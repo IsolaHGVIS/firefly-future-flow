@@ -40,10 +40,24 @@ export function ThemeProvider({
         ? "dark"
         : "light";
       root.classList.add(systemTheme);
+      
+      // Apply additional classes for full dark mode
+      if (systemTheme === "dark") {
+        document.body.classList.add("bg-black");
+      } else {
+        document.body.classList.remove("bg-black");
+      }
       return;
     }
 
     root.classList.add(theme);
+    
+    // Apply additional classes for full dark mode
+    if (theme === "dark") {
+      document.body.classList.add("bg-black");
+    } else {
+      document.body.classList.remove("bg-black");
+    }
   }, [theme]);
 
   const value = {

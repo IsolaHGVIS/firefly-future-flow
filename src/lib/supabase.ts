@@ -1,0 +1,95 @@
+
+import { createClient } from '@supabase/supabase-js';
+
+// For now, we'll use placeholder URLs that will be replaced with environment variables
+// In production, these would be set as environment variables
+const supabaseUrl = 'https://your-project-url.supabase.co';
+const supabaseAnonKey = 'your-anon-key';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Types for our user profiles
+export type UserProfile = {
+  id: string;
+  email: string;
+  monthly_income: number;
+  monthly_expenses: number;
+  savings: number;
+  fire_goal: number;
+  created_at: string;
+  updated_at: string;
+};
+
+// Helper functions for auth
+export const signUp = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+  return { data, error };
+};
+
+export const signIn = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  return { data, error };
+};
+
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  return { error };
+};
+
+export const getCurrentUser = async () => {
+  const { data, error } = await supabase.auth.getUser();
+  return { user: data.user, error };
+};
+
+// User profile functions
+export const getProfile = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  
+  return { profile: data as UserProfile | null, error };
+};
+
+export const updateProfile = async (userId: string, updates: Partial<UserProfile>) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+  
+  return { data, error };
+};
+
+// Save financial data
+export const saveFinancialData = async (userId: string, financialData: any) => {
+  const { data, error } = await supabase
+    .from('financial_data')
+    .insert({
+      user_id: userId,
+      data: financialData,
+      created_at: new Date().toISOString(),
+    });
+  
+  return { data, error };
+};
+
+// Get financial data history
+export const getFinancialHistory = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('financial_data')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  
+  return { history: data, error };
+};

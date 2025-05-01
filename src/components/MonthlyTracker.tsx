@@ -21,12 +21,20 @@ interface MonthlyTrackerProps {
   onUpdate?: (savings: number, savingsRate: number) => void;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+const COLORS = ['#9b87f5', '#8B5CF6', '#7E69AB', '#6E59A5', '#D6BCFA', '#E5DEFF'];
 
 const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
   const [monthlyIncome, setMonthlyIncome] = useState<number>(5000);
-  const [showIncomeItems, setShowIncomeItems] = useState<boolean>(false);
-  const [incomeItems, setIncomeItems] = useState<MoneyItem[]>([]);
+  // Start with itemized income as default (true instead of false)
+  const [showIncomeItems, setShowIncomeItems] = useState<boolean>(true);
+  const [incomeItems, setIncomeItems] = useState<MoneyItem[]>([
+    {
+      id: "default-salary",
+      name: "Monthly Salary",
+      amount: 5000,
+      category: "salary"
+    }
+  ]);
   const [expenseItems, setExpenseItems] = useState<MoneyItem[]>([]);
   
   const [newIncomeName, setNewIncomeName] = useState<string>('');
@@ -54,7 +62,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
       
       categoryMap.set(item.category, {
         value: currentAmount + item.amount,
-        color: category?.color || '#64748B',
+        color: category?.color || '#7E69AB', // Updated default color to purple
         name: category?.name || item.category
       });
     });
@@ -63,7 +71,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
     if (monthlySavings > 0) {
       categoryMap.set('savings', {
         value: monthlySavings,
-        color: '#10B981',
+        color: '#9b87f5', // Updated to purple
         name: 'Savings'
       });
     }
@@ -83,7 +91,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
       
       categoryMap.set(item.category, {
         value: currentAmount + item.amount,
-        color: category?.color || '#64748B',
+        color: category?.color || '#7E69AB', // Updated default color to purple
         name: category?.name || item.category
       });
     });
@@ -92,7 +100,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
     if (incomeItems.length === 0 && monthlyIncome > 0) {
       categoryMap.set('default', {
         value: monthlyIncome,
-        color: '#10B981',
+        color: '#9b87f5', // Updated to purple
         name: 'Monthly Income'
       });
     }
@@ -190,9 +198,9 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
   
   const getCategoryColor = (id: string, type: 'income' | 'expense') => {
     if (type === 'income') {
-      return incomeCategories.find(cat => cat.id === id)?.color || '#64748B';
+      return incomeCategories.find(cat => cat.id === id)?.color || '#7E69AB'; // Updated default color
     } else {
-      return expenseCategories.find(cat => cat.id === id)?.color || '#64748B';
+      return expenseCategories.find(cat => cat.id === id)?.color || '#7E69AB'; // Updated default color
     }
   };
   
@@ -398,7 +406,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
               <CardDescription>Source distribution of your income</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-52">
+              <div className="h-60"> {/* Increased height to prevent text cutting off */}
                 {totalIncome > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -407,7 +415,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
                         cx="50%"
                         cy="50%"
                         innerRadius={40}
-                        outerRadius={80}
+                        outerRadius={70} {/* Reduced outer radius to prevent text cut-off */}
                         paddingAngle={2}
                         dataKey="value"
                         label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
@@ -435,7 +443,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
               <CardDescription>Where your money is going</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-52">
+              <div className="h-60"> {/* Increased height to prevent text cutting off */}
                 {expenseItems.length > 0 || monthlySavings > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -444,7 +452,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
                         cx="50%"
                         cy="50%"
                         innerRadius={40}
-                        outerRadius={80}
+                        outerRadius={70} {/* Reduced outer radius to prevent text cut-off */}
                         paddingAngle={2}
                         dataKey="value"
                         label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}

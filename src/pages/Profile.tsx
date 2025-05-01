@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import MonthlyTracker from '@/components/MonthlyTracker';
 import AiTips from '@/components/AiTips';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,16 +11,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import MonthlyFinanceChart from '@/components/MonthlyFinanceChart';
 import FinanceCalendar from '@/components/FinanceCalendar';
 import { ChartBar, Calendar } from "lucide-react";
-
-// Sample data for demonstration
-const sampleFireResult: FireResult = {
-  fireNumber: 1000000,
-  yearsToFire: 15,
-  retirementAge: 45,
-  projectedSavings: 250000, // 25% of the way there
-  monthlyPassiveIncome: 3333,
-  isOnTrack: true
-};
+import { useAuth } from '@/components/AuthProvider';
+import { getProfile, saveFinancialData } from '@/lib/supabase';
 
 // Sample transactions for demonstration
 const sampleTransactions = [
@@ -36,9 +29,53 @@ const sampleTransactions = [
 ];
 
 const Profile = () => {
+  const { user, loading } = useAuth();
   const [currentSavings, setCurrentSavings] = useState<number>(250000);
   const [savingsRate, setSavingsRate] = useState<number>(30);
-  const [fireResult] = useState<FireResult>(sampleFireResult);
+  const [fireResult, setFireResult] = useState<FireResult>({
+    fireNumber: 1000000,
+    yearsToFire: 15,
+    retirementAge: 45,
+    projectedSavings: 250000, // 25% of the way there
+    monthlyPassiveIncome: 3333,
+    isOnTrack: true
+  });
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (user?.id) {
+        const { profile, error } = await getProfile(user.id);
+        if (profile && !error) {
+          setCurrentSavings(profile.savings || 250000);
+          setSavingsRate(30); // Default if not available
+          setFireResult(prev => ({
+            ...prev,
+            fireNumber: profile.fire_goal || 1000000,
+            projectedSavings: profile.savings || 250000
+          }));
+        }
+      }
+    };
+    
+    if (user) {
+      fetchProfileData();
+    }
+  }, [user]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-xl">Loading your profile...</div>
+      </div>
+    );
+  }
+
+  // Redirect if not logged in
+  if (!user && !loading) {
+    return <Navigate to="/signin" />;
+  }
 
   // Calculate total income, expenses, and net balance from transactions
   const totalIncome = sampleTransactions
@@ -54,8 +91,17 @@ const Profile = () => {
   const firePercentage = (totalBalance / fireResult.fireNumber) * 100;
 
   const handleMonthlyUpdate = (savings: number, savingsRate: number) => {
-    // This would typically update state or be passed to a parent component
     setSavingsRate(savingsRate);
+    
+    // Save data to Supabase if user is logged in
+    if (user?.id) {
+      saveFinancialData(user.id, {
+        savingsRate,
+        monthlyIncome: totalIncome,
+        monthlyExpenses: totalExpenses,
+        netBalance
+      });
+    }
   };
 
   return (

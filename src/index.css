@@ -36,20 +36,20 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* FIRE specific colors */
+    --fire-purple: 260 80% 70%;
+    --fire-blue: 220 80% 60%;
+    --fire-red: 0 80% 60%;
+    --fire-green: 140 70% 40%;
+    --fire-orange: 30 80% 60%;
   }
 
   .dark {
@@ -89,6 +89,13 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* FIRE specific colors for dark mode */
+    --fire-purple: 260 80% 70%;
+    --fire-blue: 220 70% 70%;
+    --fire-red: 0 70% 60%;
+    --fire-green: 140 60% 50%;
+    --fire-orange: 30 70% 60%;
   }
 }
 
@@ -99,5 +106,36 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom colors for components */
+@layer utilities {
+  .text-fire-purple {
+    color: hsl(var(--fire-purple));
+  }
+  
+  .text-fire-blue {
+    color: hsl(var(--fire-blue));
+  }
+  
+  .text-fire-red {
+    color: hsl(var(--fire-red));
+  }
+  
+  .text-fire-green {
+    color: hsl(var(--fire-green));
+  }
+  
+  .text-fire-orange {
+    color: hsl(var(--fire-orange));
+  }
+  
+  .bg-fire-purple {
+    background-color: hsl(var(--fire-purple));
+  }
+  
+  .bg-fire-blue {
+    background-color: hsl(var(--fire-blue));
   }
 }
