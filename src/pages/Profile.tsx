@@ -6,6 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { FireResult, formatCurrency } from '@/utils/fireCalculations';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import MonthlyFinanceChart from '@/components/MonthlyFinanceChart';
+import FinanceCalendar from '@/components/FinanceCalendar';
+import { ChartBar, Calendar } from "lucide-react";
 
 // Sample data for demonstration
 const sampleFireResult: FireResult = {
@@ -17,10 +21,37 @@ const sampleFireResult: FireResult = {
   isOnTrack: true
 };
 
+// Sample transactions for demonstration
+const sampleTransactions = [
+  { id: '1', amount: 5000, category: 'Salary', date: '2025-05-01', type: 'income' as const },
+  { id: '2', amount: 1200, category: 'Housing', date: '2025-05-01', type: 'expense' as const },
+  { id: '3', amount: 200, category: 'Utilities', date: '2025-05-02', type: 'expense' as const },
+  { id: '4', amount: 350, category: 'Groceries', date: '2025-05-03', type: 'expense' as const },
+  { id: '5', amount: 800, category: 'Investment', date: '2025-05-05', type: 'income' as const },
+  { id: '6', amount: 150, category: 'Dining Out', date: '2025-05-08', type: 'expense' as const },
+  { id: '7', amount: 1000, category: 'Side Hustle', date: '2025-05-15', type: 'income' as const },
+  { id: '8', amount: 500, category: 'Shopping', date: '2025-05-15', type: 'expense' as const },
+  { id: '9', amount: 100, category: 'Subscriptions', date: '2025-05-20', type: 'expense' as const },
+  { id: '10', amount: 300, category: 'Transportation', date: '2025-05-25', type: 'expense' as const },
+];
+
 const Profile = () => {
   const [currentSavings, setCurrentSavings] = useState<number>(250000);
   const [savingsRate, setSavingsRate] = useState<number>(30);
   const [fireResult] = useState<FireResult>(sampleFireResult);
+
+  // Calculate total income, expenses, and net balance from transactions
+  const totalIncome = sampleTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalExpenses = sampleTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const netBalance = totalIncome - totalExpenses;
+  const totalBalance = currentSavings + netBalance;
+  const firePercentage = (totalBalance / fireResult.fireNumber) * 100;
 
   const handleMonthlyUpdate = (savings: number, savingsRate: number) => {
     // This would typically update state or be passed to a parent component
@@ -29,9 +60,56 @@ const Profile = () => {
 
   return (
     <div className="container max-w-6xl mx-auto p-4 py-8 space-y-8">
-      <div className="text-center md:text-left">
-        <h1 className="text-3xl font-bold text-gray-900">Your Financial Profile</h1>
-        <p className="text-gray-600">Track your monthly finances and progress toward FIRE</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Your Financial Profile</h1>
+          <p className="text-gray-600 dark:text-gray-400">Track your monthly finances and progress toward FIRE</p>
+        </div>
+        <ThemeToggle />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Current Savings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(currentSavings)}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total investment portfolio</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Net Balance (Month)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${netBalance >= 0 ? 'text-fire-green' : 'text-fire-red'}`}>
+              {netBalance >= 0 ? '+' : ''}{formatCurrency(netBalance)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Income minus expenses</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Total Net Worth</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(totalBalance)}</div>
+            <p className="text-xs text-muted-foreground mt-1">Savings + current month net</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">FIRE Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{Math.round(firePercentage)}%</div>
+            <Progress value={firePercentage} className="h-2 mt-2" />
+          </CardContent>
+        </Card>
       </div>
       
       <Card>
@@ -40,14 +118,14 @@ const Profile = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex justify-between mb-2 items-center">
-            <span className="text-gray-600">Current savings: {formatCurrency(currentSavings)}</span>
-            <span className="font-medium">{Math.round((currentSavings / fireResult.fireNumber) * 100)}%</span>
+            <span className="text-gray-600 dark:text-gray-400">Current net worth: {formatCurrency(totalBalance)}</span>
+            <span className="font-medium">{Math.round((totalBalance / fireResult.fireNumber) * 100)}%</span>
           </div>
           <Progress 
-            value={(currentSavings / fireResult.fireNumber) * 100} 
-            className="h-3 bg-gray-100" 
+            value={(totalBalance / fireResult.fireNumber) * 100} 
+            className="h-3 bg-gray-100 dark:bg-gray-800" 
           />
-          <div className="flex justify-between text-sm text-gray-500">
+          <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
             <span>$0</span>
             <span>{formatCurrency(fireResult.fireNumber / 2)}</span>
             <span>{formatCurrency(fireResult.fireNumber)}</span>
@@ -55,19 +133,19 @@ const Profile = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-              <div className="text-sm text-gray-500">FIRE Number</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">FIRE Number</div>
               <div className="text-2xl font-bold text-fire-blue">
                 {formatCurrency(fireResult.fireNumber)}
               </div>
             </div>
             
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-              <div className="text-sm text-gray-500">Current Savings Rate</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Current Savings Rate</div>
               <div className="text-2xl font-bold text-fire-purple">{savingsRate}%</div>
             </div>
             
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-              <div className="text-sm text-gray-500">Est. Years to FIRE</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Est. Years to FIRE</div>
               <div className="text-2xl font-bold text-fire-orange">{fireResult.yearsToFire.toFixed(1)}</div>
             </div>
           </div>
@@ -77,11 +155,27 @@ const Profile = () => {
       <Tabs defaultValue="monthly-tracker" className="space-y-4">
         <TabsList>
           <TabsTrigger value="monthly-tracker">Monthly Tracker</TabsTrigger>
+          <TabsTrigger value="charts">
+            <ChartBar className="mr-2 h-4 w-4" />
+            Charts
+          </TabsTrigger>
+          <TabsTrigger value="calendar">
+            <Calendar className="mr-2 h-4 w-4" />
+            Calendar
+          </TabsTrigger>
           <TabsTrigger value="fire-tips">FIRE Tips</TabsTrigger>
         </TabsList>
         
         <TabsContent value="monthly-tracker">
           <MonthlyTracker onUpdate={handleMonthlyUpdate} />
+        </TabsContent>
+        
+        <TabsContent value="charts">
+          <MonthlyFinanceChart transactions={sampleTransactions} />
+        </TabsContent>
+        
+        <TabsContent value="calendar">
+          <FinanceCalendar transactions={sampleTransactions} />
         </TabsContent>
         
         <TabsContent value="fire-tips">
