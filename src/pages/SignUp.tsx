@@ -56,7 +56,7 @@ const SignUp = () => {
           title: "Account created",
           description: "Please check your email to confirm your account.",
         });
-        navigate('/signin');
+        navigate('/register');
       }
     } catch (error) {
       toast({

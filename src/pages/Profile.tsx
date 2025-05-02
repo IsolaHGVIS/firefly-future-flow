@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import MonthlyTracker from '@/components/MonthlyTracker';
 import AiTips from '@/components/AiTips';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +13,8 @@ import FinanceCalendar from '@/components/FinanceCalendar';
 import { ChartBar, Calendar } from "lucide-react";
 import { useAuth } from '@/components/AuthProvider';
 import { getProfile, saveFinancialData } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 // Sample transactions for demonstration
 const sampleTransactions = [
@@ -29,9 +31,12 @@ const sampleTransactions = [
 ];
 
 const Profile = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [currentSavings, setCurrentSavings] = useState<number>(250000);
   const [savingsRate, setSavingsRate] = useState<number>(30);
+  const [loading, setLoading] = useState<boolean>(false);
   const [fireResult, setFireResult] = useState<FireResult>({
     fireNumber: 1000000,
     yearsToFire: 15,
@@ -45,6 +50,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       if (user?.id) {
+        setLoading(true);
         const { profile, error } = await getProfile(user.id);
         if (profile && !error) {
           setCurrentSavings(profile.savings || 250000);
@@ -55,6 +61,7 @@ const Profile = () => {
             projectedSavings: profile.savings || 250000
           }));
         }
+        setLoading(false);
       }
     };
     
@@ -62,20 +69,6 @@ const Profile = () => {
       fetchProfileData();
     }
   }, [user]);
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-xl">Loading your profile...</div>
-      </div>
-    );
-  }
-
-  // Redirect if not logged in
-  if (!user && !loading) {
-    return <Navigate to="/signin" />;
-  }
 
   // Calculate total income, expenses, and net balance from transactions
   const totalIncome = sampleTransactions
@@ -100,9 +93,58 @@ const Profile = () => {
         monthlyIncome: totalIncome,
         monthlyExpenses: totalExpenses,
         netBalance
+      }).then(() => {
+        toast({
+          title: "Data saved",
+          description: "Your financial data has been updated successfully",
+        });
+      }).catch(() => {
+        toast({
+          title: "Error saving data",
+          description: "There was a problem updating your financial data",
+          variant: "destructive",
+        });
       });
     }
   };
+
+  // If auth is not loading and user is not logged in, show login/register options
+  if (!authLoading && !user) {
+    return (
+      <div className="container max-w-6xl mx-auto p-4 py-8 space-y-8 min-h-screen flex flex-col items-center justify-center">
+        <div className="text-center space-y-4 max-w-md">
+          <h1 className="text-3xl font-bold">Access Your Financial Profile</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Sign in to your account or register to start tracking your path to FIRE
+          </p>
+          <div className="flex flex-col space-y-4 mt-6">
+            <Button 
+              onClick={() => navigate('/signin')}
+              className="w-full bg-fire-purple hover:bg-fire-purple/90"
+            >
+              Sign In
+            </Button>
+            <Button 
+              onClick={() => navigate('/signup')}
+              variant="outline"
+              className="w-full"
+            >
+              Create Account
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (authLoading || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-xl">Loading your profile...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-6xl mx-auto p-4 py-8 space-y-8">

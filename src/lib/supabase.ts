@@ -20,6 +20,13 @@ export type UserProfile = {
   updated_at: string;
 };
 
+export type FinancialData = {
+  id?: string;
+  user_id: string;
+  data: any;
+  created_at: string;
+};
+
 // Helper functions for auth
 export const signUp = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signUp({
@@ -61,11 +68,11 @@ export const getProfile = async (userId: string) => {
 export const updateProfile = async (userId: string, updates: Partial<UserProfile>) => {
   const { data, error } = await supabase
     .from('profiles')
-    .update({
+    .upsert({
       ...updates,
+      id: userId,
       updated_at: new Date().toISOString(),
-    })
-    .eq('id', userId);
+    }, { onConflict: 'id' });
   
   return { data, error };
 };
@@ -91,5 +98,18 @@ export const getFinancialHistory = async (userId: string) => {
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   
-  return { history: data, error };
+  return { history: data as FinancialData[], error };
+};
+
+// Get the latest financial data entry
+export const getLatestFinancialData = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('financial_data')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+  
+  return { latestData: data as FinancialData | null, error };
 };
