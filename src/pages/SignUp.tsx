@@ -48,25 +48,36 @@ const SignUp = () => {
       if (error) {
         toast({
           title: "Sign up failed",
-          description: error.message,
+          description: error.message || "Please try again later",
           variant: "destructive",
         });
+        console.error("Sign up error:", error);
       } else {
         toast({
-          title: "Account created",
-          description: "Please check your email to confirm your account.",
+          title: "Account creation initiated",
+          description: "Proceed to complete your profile details.",
         });
         navigate('/register');
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "An error occurred",
-        description: "Please try again later.",
+        description: error.message || "Please try again later",
         variant: "destructive",
       });
+      console.error("Sign up exception:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Allow users to skip signup and see the profile demo
+  const handleViewDemo = () => {
+    navigate('/profile');
+    toast({
+      title: "Demo mode",
+      description: "You're viewing the app in demo mode. Create an account to save your data.",
+    });
   };
 
   return (
@@ -151,6 +162,17 @@ const SignUp = () => {
                 {loading ? "Creating account..." : "Create Account"}
               </Button>
             </form>
+            
+            <div className="mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleViewDemo}
+              >
+                View Demo Without Account
+              </Button>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             <div className="text-sm text-center text-muted-foreground">

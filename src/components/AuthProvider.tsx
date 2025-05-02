@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const { user: currentUser, error } = await getCurrentUser();
         if (error) {
-          console.error('Error fetching user:', error);
+          console.error('Auth session missing or error fetching user');
           setUser(null);
         } else if (currentUser) {
           setUser({
@@ -59,6 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
         }
+        setLoading(false);
       }
     );
 

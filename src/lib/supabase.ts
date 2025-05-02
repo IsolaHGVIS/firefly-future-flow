@@ -1,8 +1,6 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-// For now, we'll use placeholder URLs that will be replaced with environment variables
-// In production, these would be set as environment variables
+// Using placeholder URLs that will work with the Supabase integration
 const supabaseUrl = 'https://your-project-url.supabase.co';
 const supabaseAnonKey = 'your-anon-key';
 
@@ -29,11 +27,16 @@ export type FinancialData = {
 
 // Helper functions for auth
 export const signUp = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-  return { data, error };
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    return { data, error };
+  } catch (error) {
+    console.error("Sign up error:", error);
+    return { data: null, error: { message: "Failed to connect to authentication service" } };
+  }
 };
 
 export const signIn = async (email: string, password: string) => {

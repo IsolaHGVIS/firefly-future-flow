@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signUp, updateProfile } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -18,10 +16,10 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string(),
-  currentSavings: z.string().transform((val) => parseInt(val, 10) || 0),
-  monthlyIncome: z.string().transform((val) => parseInt(val, 10) || 0),
-  monthlyExpenses: z.string().transform((val) => parseInt(val, 10) || 0),
-  fireGoal: z.string().transform((val) => parseInt(val, 10) || 1000000)
+  currentSavings: z.coerce.number().nonnegative(),
+  monthlyIncome: z.coerce.number().nonnegative(),
+  monthlyExpenses: z.coerce.number().nonnegative(),
+  fireGoal: z.coerce.number().nonnegative().default(1000000)
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -41,10 +39,10 @@ const Register = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      currentSavings: "0",
-      monthlyIncome: "0",
-      monthlyExpenses: "0",
-      fireGoal: "1000000"
+      currentSavings: 0,
+      monthlyIncome: 0,
+      monthlyExpenses: 0,
+      fireGoal: 1000000
     }
   });
 

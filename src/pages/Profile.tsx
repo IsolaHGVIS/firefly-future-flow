@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import MonthlyTracker from '@/components/MonthlyTracker';
 import AiTips from '@/components/AiTips';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -67,6 +67,9 @@ const Profile = () => {
     
     if (user) {
       fetchProfileData();
+    } else {
+      // Make sure loading state is reset for demo mode
+      setLoading(false);
     }
   }, [user]);
 
@@ -105,38 +108,57 @@ const Profile = () => {
           variant: "destructive",
         });
       });
+    } else {
+      // Just show a demo message if not logged in
+      toast({
+        title: "Demo mode",
+        description: "Sign in to save your financial data",
+      });
     }
   };
 
-  // If auth is not loading and user is not logged in, show login/register options
-  if (!authLoading && !user) {
-    return (
-      <div className="container max-w-6xl mx-auto p-4 py-8 space-y-8 min-h-screen flex flex-col items-center justify-center">
-        <div className="text-center space-y-4 max-w-md">
-          <h1 className="text-3xl font-bold">Access Your Financial Profile</h1>
+  // Guest view for profile page with demo data
+  const renderGuestProfileView = () => (
+    <div className="container max-w-6xl mx-auto p-4 py-8 space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Demo Profile</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Sign in to your account or register to start tracking your path to FIRE
-          </p>
-          <div className="flex flex-col space-y-4 mt-6">
-            <Button 
+            This is a demo of the financial tracker. <Button 
               onClick={() => navigate('/signin')}
-              className="w-full bg-fire-purple hover:bg-fire-purple/90"
+              variant="link"
+              className="p-0 h-auto text-fire-purple"
             >
-              Sign In
-            </Button>
-            <Button 
+              Sign in
+            </Button> or <Button 
               onClick={() => navigate('/signup')}
-              variant="outline"
-              className="w-full"
+              variant="link"
+              className="p-0 h-auto text-fire-purple"
             >
-              Create Account
-            </Button>
-          </div>
+              create an account
+            </Button> to save your data.
+          </p>
         </div>
+        <ThemeToggle />
       </div>
-    );
-  }
-
+      
+      {/* Show the same content as if user was logged in, but with demo data */}
+      {renderProfileContent()}
+      
+      <div className="fixed bottom-4 right-4 bg-fire-purple text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+        <span>Create an account to save your data</span>
+        <Button 
+          onClick={() => navigate('/signup')}
+          variant="secondary"
+          size="sm"
+          className="bg-white text-fire-purple hover:bg-gray-100"
+        >
+          Sign Up
+        </Button>
+      </div>
+    </div>
+  );
+  
   // Loading state
   if (authLoading || loading) {
     return (
@@ -146,16 +168,9 @@ const Profile = () => {
     );
   }
 
-  return (
-    <div className="container max-w-6xl mx-auto p-4 py-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Your Financial Profile</h1>
-          <p className="text-gray-600 dark:text-gray-400">Track your monthly finances and progress toward FIRE</p>
-        </div>
-        <ThemeToggle />
-      </div>
-      
+  // Profile content that's shown regardless of auth state
+  const renderProfileContent = () => (
+    <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="pb-2">
@@ -312,6 +327,25 @@ const Profile = () => {
           </div>
         </TabsContent>
       </Tabs>
+    </>
+  );
+
+  // Main render function
+  if (!user) {
+    return renderGuestProfileView();
+  }
+
+  return (
+    <div className="container max-w-6xl mx-auto p-4 py-8 space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Your Financial Profile</h1>
+          <p className="text-gray-600 dark:text-gray-400">Track your monthly finances and progress toward FIRE</p>
+        </div>
+        <ThemeToggle />
+      </div>
+      
+      {renderProfileContent()}
     </div>
   );
 };
