@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -176,7 +175,8 @@ const MonthlyFinanceChart: React.FC<MonthlyFinanceChartProps> = ({
             config={chartConfig} 
             className="h-full w-full rounded-lg border border-border overflow-hidden"
           >
-            {chartType === 'bar' && (
+            {/* Wrap chart content in a fragment to satisfy the type requirement */}
+            {chartType === 'bar' ? (
               <BarChart
                 data={monthlyData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
@@ -208,9 +208,7 @@ const MonthlyFinanceChart: React.FC<MonthlyFinanceChartProps> = ({
                 <Bar dataKey="expense" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="net" name="Net" fill="#0EA5E9" radius={[4, 4, 0, 0]} />
               </BarChart>
-            )}
-            
-            {chartType === 'line' && (
+            ) : chartType === 'line' ? (
               <LineChart
                 data={monthlyData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
@@ -242,9 +240,7 @@ const MonthlyFinanceChart: React.FC<MonthlyFinanceChartProps> = ({
                 <Line type="monotone" dataKey="expense" stroke="#ef4444" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
                 <Line type="monotone" dataKey="net" stroke="#0EA5E9" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
-            )}
-            
-            {chartType === 'growth' && (
+            ) : (
               <LineChart
                 data={growthData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
