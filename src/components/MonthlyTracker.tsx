@@ -406,7 +406,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
               <CardDescription>Source distribution of your income</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-60"> {/* Increased height to prevent text cutting off */}
+              <div className="h-60">
                 {totalIncome > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -415,7 +415,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
                         cx="50%"
                         cy="50%"
                         innerRadius={40}
-                        outerRadius={70} {/* Reduced outer radius to prevent text cut-off */}
+                        outerRadius={70}
                         paddingAngle={2}
                         dataKey="value"
                         label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
@@ -443,7 +443,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
               <CardDescription>Where your money is going</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-60"> {/* Increased height to prevent text cutting off */}
+              <div className="h-60">
                 {expenseItems.length > 0 || monthlySavings > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -452,7 +452,7 @@ const MonthlyTracker: React.FC<MonthlyTrackerProps> = ({ onUpdate }) => {
                         cx="50%"
                         cy="50%"
                         innerRadius={40}
-                        outerRadius={70} {/* Reduced outer radius to prevent text cut-off */}
+                        outerRadius={70}
                         paddingAngle={2}
                         dataKey="value"
                         label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
