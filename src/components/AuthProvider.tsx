@@ -42,9 +42,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Auth error:', error);
       } finally {
+        // Always set loading to false even if there's an error
         setLoading(false);
       }
     };
+
+    // Set a timeout to ensure loading state doesn't get stuck
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.log('Auth check timeout reached, setting loading to false');
+        setLoading(false);
+      }
+    }, 5000);
 
     checkUser();
 
@@ -64,9 +73,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     return () => {
+      clearTimeout(timeoutId);
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [loading]); // Added loading as a dependency
 
   const signOutUser = async () => {
     await supabase.auth.signOut();

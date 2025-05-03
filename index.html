@@ -17,20 +17,31 @@
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
     
-    <!-- Script to handle ethereum property conflict -->
+    <!-- Improved script to handle ethereum property conflict -->
     <script>
       // Handle potential conflicts with ethereum property on window
       if (typeof window !== 'undefined') {
         try {
           // Check if ethereum property is already defined
-          const hasEthereum = Object.getOwnPropertyDescriptor(window, 'ethereum');
+          const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
           
-          // Only create if not already defined
-          if (!hasEthereum) {
+          // Only create if not already defined or if it's configurable
+          if (!descriptor) {
+            // Define a configurable property to allow override
             Object.defineProperty(window, 'ethereum', {
               value: null,
               writable: true,
-              configurable: true
+              configurable: true,
+              enumerable: true
+            });
+          } else if (descriptor.configurable) {
+            // If property exists but is configurable, redefine it
+            const currentValue = window.ethereum;
+            Object.defineProperty(window, 'ethereum', {
+              value: currentValue,
+              writable: true,
+              configurable: true,
+              enumerable: true
             });
           }
         } catch (e) {
